@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Browser rhythm games: BPM, subdivisions, and input windows</title>
+<meta name="description" content="A dependency-free timing model for browser rhythm games using BPM, subdivisions, and judgement windows.">
+<style>body{font:16px/1.65 system-ui,sans-serif;max-width:860px;margin:0 auto;padding:32px;color:#203040}code,pre{background:#f2f5f7;border-radius:6px}pre{padding:16px;overflow:auto}.note{border-left:4px solid #ef6c57;padding-left:16px}</style>
+</head>
+<body>
+<main>
+<h1>Browser rhythm games: BPM, subdivisions, and input windows</h1>
+<p>Timing code becomes easier to debug when a game converts BPM to milliseconds once, then compares input timestamps against a separate judgement window. Rendering, audio scheduling, and scoring can share the same normalized clock.</p>
+<h2>Normalize the beat</h2>
+<pre><code>function timingFromBpm(bpm, subdivision = 4) {
+  const safeBpm = Math.min(400, Math.max(20, Number(bpm)));
+  const beatMs = 60000 / safeBpm;
+  return {
+    beatMs,
+    subdivisionMs: beatMs / Math.max(1, Number(subdivision))
+  };
+}
+
+function judgement(deltaMs, windowMs = 45) {
+  const delta = Math.abs(Number(deltaMs));
+  if (delta &lt;= windowMs) return "perfect";
+  if (delta &lt;= windowMs * 2) return "good";
+  return "miss";
+}</code></pre>
+<h2>Keep the clocks separate</h2>
+<ul>
+<li>Use an audio or monotonic clock for hit timing, not a frame counter.</li>
+<li>Apply input latency calibration before scoring.</li>
+<li>Keep the note subdivision separate from the visual animation step.</li>
+<li>Clamp impossible BPM values at the input boundary.</li>
+</ul>
+<h2>Useful test cases</h2>
+<p>At 120 BPM a beat is 500 ms and a sixteenth note is 125 ms. Test an input exactly on the boundary, just outside it, and a long-frame scenario where rendering misses a frame. These cases expose rounding and timer drift.</p>
+<p class="note">For a browser-play comparison, <a href="https://fnf-online.net/" rel="noopener">FNF Online</a> is an unofficial fan resource. This page does not claim to own Friday Night Funkin', its music, characters, or mods.</p>
+</main>
+</body>
+</html>
