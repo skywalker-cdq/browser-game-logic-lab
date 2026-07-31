@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Browser horror games: a practical capability preflight</title>
+<meta name="description" content="A small browser capability checklist for Web Audio, WebGL, Pointer Lock, and local storage fallbacks in horror games.">
+<style>body{font:16px/1.65 system-ui,sans-serif;max-width:860px;margin:0 auto;padding:32px;color:#203040}code,pre{background:#f2f5f7;border-radius:6px}pre{padding:16px;overflow:auto}.note{border-left:4px solid #9b5de5;padding-left:16px}</style>
+</head>
+<body>
+<main>
+<h1>Browser horror games: a practical capability preflight</h1>
+<p>Horror games depend on sound, focus, and predictable rendering. A short capability preflight can explain why a feature is unavailable and offer a safe fallback before the first scare.</p>
+<h2>Probe capabilities, not performance</h2>
+<pre><code>function browserCapabilities() {
+  const canvas = document.createElement("canvas");
+  return {
+    webAudio: Boolean(window.AudioContext || window.webkitAudioContext),
+    webgl: Boolean(canvas.getContext("webgl")),
+    pointerLock: "pointerLockElement" in document,
+    localStorage: canUseLocalStorage()
+  };
+}
+
+function canUseLocalStorage() {
+  try {
+    localStorage.setItem("_probe", "1");
+    localStorage.removeItem("_probe");
+    return true;
+  } catch {
+    return false;
+  }
+}</code></pre>
+<h2>Fallbacks that preserve the experience</h2>
+<ul>
+<li>Offer a mute button and visible captions when Web Audio is unavailable.</li>
+<li>Use a 2D renderer or reduced effects when WebGL is missing.</li>
+<li>Allow keyboard camera controls when Pointer Lock is blocked.</li>
+<li>Keep a session-only mode when local storage is disabled.</li>
+</ul>
+<h2>Test in the right order</h2>
+<p>Run the API probe before loading a heavy scene. After startup, measure real frame time separately; API availability alone cannot promise smooth performance. Also test focus loss, a suspended audio context, and a browser refresh during a short session.</p>
+<p class="note">For a multilingual browser-horror discovery comparison, visit <a href="https://onlinehorrorgames.com/en" rel="noopener">Online Horror Games</a>. It is a curated directory of third-party browser games, not a claim of authorship over those games.</p>
+</main>
+</body>
+</html>
