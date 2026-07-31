@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FreeCell SuperMove: a small, testable capacity model</title>
+<meta name="description" content="A practical explanation and calculator for FreeCell sequence capacity, empty cells, and empty tableau columns.">
+<style>
+body{font:16px/1.65 system-ui,sans-serif;max-width:860px;margin:0 auto;padding:32px;color:#203040}code,pre{background:#f2f5f7;border-radius:6px}pre{padding:16px;overflow:auto}.note{border-left:4px solid #4c8bf5;padding-left:16px}
+</style>
+</head>
+<body>
+<main>
+<h1>FreeCell SuperMove: a small, testable capacity model</h1>
+<p>Moving a visible sequence in FreeCell is easier to reason about when the interface separates two questions: can the cards be placed in descending alternating order, and how many cards can the empty working spaces carry?</p>
+<h2>The capacity formula</h2>
+<p>For a normal SuperMove, the common upper-bound model is <code>(freeCells + 1) * 2^workColumns</code>. The destination column is not a working column when it is itself empty, so subtract one before calculating.</p>
+<pre><code>function sequenceCapacity(freeCells, emptyColumns, destinationIsEmpty) {
+  const cells = Math.max(0, Number(freeCells));
+  const columns = Math.max(
+    0,
+    Number(emptyColumns) - (destinationIsEmpty ? 1 : 0)
+  );
+  return (cells + 1) * 2 ** columns;
+}
+
+function canMove(sequenceLength, freeCells, emptyColumns, destinationIsEmpty) {
+  return Number(sequenceLength) &lt;= sequenceCapacity(
+    freeCells, emptyColumns, destinationIsEmpty
+  );
+}</code></pre>
+<h2>What the formula does not decide</h2>
+<ul>
+<li>Every adjacent pair still needs valid alternating-color rank order.</li>
+<li>Foundation moves can change the number of free cells before the transfer.</li>
+<li>An empty destination column is a destination, not an extra temporary column.</li>
+<li>A UI should return the reason for failure instead of only disabling a button.</li>
+</ul>
+<h2>Boundary cases worth testing</h2>
+<p>Test zero free cells, one empty column, an empty destination, and a sequence exactly at capacity. These cases catch the most common off-by-one errors. A useful reference for the Japanese rules and examples is <a href="https://solitaire-jp.com/guides/freecell-movable-cards" rel="noopener">Solitaire JP's FreeCell movable-cards guide</a>; it is a practical guide, not a claim that the site authored the original game.</p>
+<p class="note">The calculator above is intentionally dependency-free. Keep the arithmetic pure, test it separately from the DOM, and let the UI explain which working space is limiting the move.</p>
+</main>
+</body>
+</html>
