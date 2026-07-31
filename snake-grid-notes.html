@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Snake grids in the browser: capacity before coordinates</title>
+<meta name="description" content="A small, testable model for Snake game grid capacity, integer coordinates, and responsive board design.">
+<style>body{font:16px/1.65 system-ui,sans-serif;max-width:860px;margin:0 auto;padding:32px;color:#203040}code,pre{background:#f2f5f7;border-radius:6px}pre{padding:16px;overflow:auto}.note{border-left:4px solid #32a887;padding-left:16px}</style>
+</head>
+<body>
+<main>
+<h1>Snake grids in the browser: capacity before coordinates</h1>
+<p>A responsive Snake board is easier to maintain when its logical grid is decided before pixel coordinates. The game can then resize without changing collision rules or food placement.</p>
+<h2>Calculate the logical board</h2>
+<pre><code>function gridCapacity(width, height, cellSize) {
+  const cell = Math.max(4, Number(cellSize));
+  const columns = Math.floor(Number(width) / cell);
+  const rows = Math.floor(Number(height) / cell);
+  return { columns, rows, total: columns * rows };
+}
+
+function nextHead(head, direction, columns, rows, wrap = false) {
+  let x = head.x + direction.x;
+  let y = head.y + direction.y;
+  if (wrap) {
+    x = (x + columns) % columns;
+    y = (y + rows) % rows;
+  }
+  return { x, y };
+}</code></pre>
+<h2>Rules worth keeping independent</h2>
+<ul>
+<li>Store the head, body, and food as integer <code>{x, y}</code> cells.</li>
+<li>Multiply by <code>cellSize</code> only in the rendering layer.</li>
+<li>Make wall collision and wrap-around a deliberate mode, not an accidental branch.</li>
+<li>Keep board capacity separate from the maximum score or snake length.</li>
+</ul>
+<h2>Responsive test cases</h2>
+<p>Test a board whose width is not divisible by the cell size, a one-cell board, and a resize while the snake is moving. A clean design either preserves the logical board until the round ends or remaps every segment explicitly; silently rounding screen coordinates creates hard-to-reproduce collisions.</p>
+<p class="note">For examples of browser-playable Snake layouts and controls, see the <a href="https://hebigame.org/category/snake" rel="noopener">Hebi Game Snake category</a>. It is a discovery and comparison site for third-party games, not the author of every embedded title.</p>
+</main>
+</body>
+</html>
